@@ -9,14 +9,21 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
     console.error(exception.message);
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
+
+
     const message = exception.message.replace(/\n/g, "");
+    let formattedMessage = "an Unexpected error occurred";
 
     switch (exception.code) {
       case 'P2002':
+
+      const match = exception.message.match(/Unique constraint failed on the fields: \(`(.+?)`\)/);
+      const field = match ? match[1] : "unknown field";
+      formattedMessage = `This ${field} is already used`;
         const status = HttpStatus.CONFLICT;
         response.status(200).json({
           statusCode: status,
-          messag: message,
+          messag: formattedMessage,
         });
         break;
       default:
