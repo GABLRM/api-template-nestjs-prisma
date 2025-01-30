@@ -32,10 +32,7 @@ export class UsersController {
 
   //Update a user by id
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateUserDto: Prisma.UsersUpdateInput,
-  ) {
+  update(@Param('id') id: string, @Body() updateUserDto: Prisma.UsersUpdateInput) {
     return this.usersService.update(id, updateUserDto);
   }
 }

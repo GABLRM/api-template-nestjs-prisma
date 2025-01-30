@@ -54,11 +54,11 @@ export class UsersService {
 
   //Update a user by id
   async update(id: string, userData: Prisma.UsersUpdateInput) {
+    //Chek if userData does not contain email or name already used
+    await checkUserConflicts(this.prismaService, userData as Prisma.UsersCreateInput);
+
     //Check if userData is valid
     validateData(userData as Prisma.UsersCreateInput);
-
-    //Chek if userData does not contain email or name already used
-    checkUserConflicts(this.prismaService, userData as Prisma.UsersCreateInput);
 
     return this.prismaService.users.update({
       where: {
