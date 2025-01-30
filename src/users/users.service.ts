@@ -60,6 +60,7 @@ export class UsersService {
     //Check if userData is valid
     validateData(userData as Prisma.UsersCreateInput);
 
+    // If all the valid, update the user
     return this.prismaService.users.update({
       where: {
         id: id,
