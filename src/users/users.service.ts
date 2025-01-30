@@ -1,52 +1,69 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
 import { Prisma } from '@prisma/client';
+import { checkUserConflicts } from 'src/utils/user-conflicts-checker';
+import { hashPassword } from 'src/utils/password.utils';
+import { validateData } from 'src/utils/users-validations.utils.';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  private async hashPassword(password: string): Promise<string> {
-    const salt = await bcrypt.genSalt();
-    return bcrypt.hash(password, salt);
-  }
-
   //Create a new user
   async create(userData: Prisma.UsersCreateInput) {
-    //Check if a user exist with the same email or name
-    const existingUser = await this.prismaService.users.findFirst({
-      where: {
-        OR: [
-          {
-            email: userData.email,
-          },
-          {
-            name: userData.name,
-          },
-        ],
-      },
-    });
+    //check if userData does not contain email or name already used
+    await checkUserConflicts(this.prismaService, userData);
 
-    //If a user exist with the same email or name, add it to the conflicts array
-    if (existingUser) {
-      const conflicts = [];
-      if (existingUser.email === userData.email) {
-        conflicts.push(`email ${userData.email} already used`);
-      }
-      if (existingUser.name === userData.name) {
-        conflicts.push(`name ${userData.name} already used`);
-      }
-      if (conflicts.length > 0) {
-        throw new ConflictException(conflicts);
-      }
-    }
+    //Check if userData is valid
+    validateData(userData);
 
     //Hash the password
-    userData.password = await this.hashPassword(userData.password);
+    userData.password = await hashPassword(userData.password);
 
-    //Create the user
+    // If all is valid, create a new user
     return this.prismaService.users.create({
+      data: userData,
+    });
+  }
+
+  //Find a user by id
+  async findOne(id: string) {
+    return this.prismaService.users.findUnique({
+      where: {
+        id: id,
+      },
+    });
+  }
+
+  //Find All users
+  async findAll() {
+    return this.prismaService.users.findMany();
+  }
+
+  //Deactivate a user by id
+  async deactivate(id: string) {
+    return this.prismaService.users.update({
+      where: {
+        id: id,
+      },
+      data: {
+        isActive: false,
+      },
+    });
+  }
+
+  //Update a user by id
+  async update(id: string, userData: Prisma.UsersUpdateInput) {
+    //Check if userData is valid
+    validateData(userData as Prisma.UsersCreateInput);
+
+    //Chek if userData does not contain email or name already used
+    checkUserConflicts(this.prismaService, userData as Prisma.UsersCreateInput);
+
+    return this.prismaService.users.update({
+      where: {
+        id: id,
+      },
       data: userData,
     });
   }
