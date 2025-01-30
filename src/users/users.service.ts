@@ -1,9 +1,9 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
-import { checkUserConflicts } from 'src/utils/user-conflicts-checker';
+import { checkUserConflicts } from 'src/utils/users/user-conflicts-checker';
 import { hashPassword } from 'src/utils/password.utils';
-import { validateData } from 'src/utils/users-validations.utils.';
+import { validateData } from 'src/utils/users/users-validations.utils.';
 
 @Injectable()
 export class UsersService {
