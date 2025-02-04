@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { checkUserConflicts } from 'src/utils/users/user-conflicts-checker';
@@ -10,11 +10,17 @@ export class UsersService {
 
   //Find a user by id
   async findOne(id: string) {
-    return this.prismaService.users.findUnique({
+    const user = await this.prismaService.users.findUnique({
       where: {
         id: id,
       },
     });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 
   //Find All users
@@ -24,7 +30,7 @@ export class UsersService {
 
   //Deactivate a user by id
   async deactivate(id: string) {
-    return this.prismaService.users.update({
+    const user = await this.prismaService.users.update({
       where: {
         id: id,
       },
@@ -32,6 +38,12 @@ export class UsersService {
         isActive: false,
       },
     });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 
   //Update a user by id
@@ -46,11 +58,17 @@ export class UsersService {
     validateData(userData as Prisma.UsersCreateInput);
 
     // If all the valid, update the user
-    return this.prismaService.users.update({
+    const user = await this.prismaService.users.update({
       where: {
         id: id,
       },
       data: userData,
     });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 }
