@@ -17,7 +17,9 @@ import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
+        // Get the secret from the .env file
         secret: configService.get<string>('JWT_SECRET'),
+        // Set the expiration time for the token
         signOptions: { expiresIn: '1d' },
       }),
     }),
