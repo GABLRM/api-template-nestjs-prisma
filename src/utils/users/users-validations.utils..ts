@@ -16,7 +16,7 @@ export function isPassword(password: string): boolean {
 
 // Check if the name is in valid format (1-20 characters long, only letters, spaces, or hyphens)
 export function isName(name: string): boolean {
-  const nameRegex = /^[a-zA-Z\s-]{1,20}$/;
+  const nameRegex = /^[a-zA-Z\s-]{3,20}$/;
   return nameRegex.test(name);
 }
 
